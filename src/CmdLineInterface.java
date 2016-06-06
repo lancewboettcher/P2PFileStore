@@ -3,6 +3,7 @@ import filestore.FileStore;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
  * Created by Simon on 6/6/16.
@@ -52,13 +53,13 @@ public class CmdLineInterface {
                 case 'r':
                     System.out.println("--- Request file ---");
                     System.out.println("Input filename to request:");
-                    String reqFilename = scanner.next();/*
+                    String reqFilename = scanner.next();
                     List<String> fileLocations = filestore.requestFile(reqFilename);
                     System.out.println("Locations for " + reqFilename + ":");
 
                     for(String s: fileLocations)
                             System.out.println("    " + s);
-*/
+
                     break;
                 //add file
                 case 'a':
@@ -73,10 +74,12 @@ public class CmdLineInterface {
                 case 's':
                     System.out.println("--- Show all files ---");
                     Map<String, Integer> fileList = filestore.listFiles();
-/*
-                    for (String s: fileList)
+
+                    Set<String> keySet = fileList.keySet();
+
+                    for (String s: keySet)
                         System.out.println("File: " + s + " Number of nodes: " + fileList.get(s));
-*/
+
                     break;
                 //list files
                 case 'l':
