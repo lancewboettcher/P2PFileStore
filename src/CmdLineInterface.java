@@ -1,5 +1,7 @@
-import chord.ChordWrapper;
+import filestore.FileStore;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -18,12 +20,12 @@ public class CmdLineInterface {
         int myPort = Integer.parseInt(args[1]);
         boolean isBootstrap = args.length == 2;
 
-        ChordWrapper chord = new ChordWrapper();
+        FileStore filestore;
 
         if(isBootstrap)
         {
             // Start new chord network
-            chord.createChordNetwork(myAddress, myPort);
+            filestore = new FileStore(myAddress, myPort, "", null);
             System.out.printf("Create a new chord network with bootstrap node on %s:%d",
                     myAddress, myPort);
         }
@@ -32,7 +34,7 @@ public class CmdLineInterface {
             String hostAddress = args[2];
             int hostPort = Integer.parseInt(args[3]);
             // Join existing chord network
-            chord.joinChordNetwork(myAddress, myPort, hostAddress, hostPort);
+            filestore = new FileStore(myAddress, myPort, hostAddress, hostPort);
             System.out.printf("Create node on %s:%d and join network with bootstrap node on %s:%d",
                     myAddress, myPort, hostAddress, hostPort);
         }
@@ -50,20 +52,23 @@ public class CmdLineInterface {
                     System.out.println("--- Request file ---");
                     System.out.println("Input filename to request:");
                     String reqFilename = scanner.next();
-                    // Request file
+                    Map<String, List<String>> fileLocations = filestore.requestFile(reqFilename);
+                    // TODO print
                     break;
                 case 'a':
                     System.out.println("--- Add file ---");
                     System.out.println("Input filename to add:");
                     String addFilename = scanner.next();
-                    // Add file
+                    System.out.println("Input filepath:");
+                    String filepath = scanner.next();
+                    filestore.addFile(addFilename, filepath);
                     break;
                 case 's':
                     System.out.println("--- Show all files ---");
-                    // List all files
+                    Map<String, Integer> fileList = filestore.listFiles();
+                    // TODO print
                     break;
                 case 'l':
-                    // leave network
                     System.out.println("--- Leave network ---");
                     // leave network
                     System.out.println("Shutting down node.");
