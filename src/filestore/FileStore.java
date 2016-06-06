@@ -1,9 +1,11 @@
 package filestore;
 
+import chord.ChordWrapper;
+import de.uniba.wiai.lspi.chord.console.command.entry.Key;
+
 import java.util.List;
 import java.util.Map;
-
-import chord.ChordWrapper;
+import java.util.stream.Collectors;
 
 public class FileStore {
 	
@@ -21,6 +23,7 @@ public class FileStore {
 	/* 
 	 * List Files
 	 * Return: <Filename, # Nodes Containing File>
+	 *     TODO contact DB for all filenames (chord does not know what files are in it)
 	 */
 	public Map<String, Integer> listFiles() {
 		
@@ -30,11 +33,10 @@ public class FileStore {
 	/* 
 	 * Request File
 	 * Params: Filename
-	 * Return: <Filename, Hosts>
+	 * Return: List<Hosts>
 	 */
-	public Map<String, List<String>> requestFile(String filename) {
-		
-		return null;
+	public List<String> requestFile(String filename) {
+		return chord.retrieve(new Key(filename)).stream().map(Object::toString).collect(Collectors.toList());
 	}
 	
 	/*
@@ -42,6 +44,6 @@ public class FileStore {
 	 * Params: Filename, Filepath
 	 */
 	public void addFile(String filename, String filepath) {
-		
+		chord.insert(new Key(filename), filepath);
 	}
 }
