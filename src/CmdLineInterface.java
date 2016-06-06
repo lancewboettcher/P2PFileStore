@@ -41,7 +41,8 @@ public class CmdLineInterface {
         }
 
         Scanner scanner = new Scanner(System.in);
-        while(true)
+        boolean shutDown = false;
+        while(!shutDown)
         {
             System.out.println("\n-------------------\n" +
                     "[r]equest file, [a]dd file, [s]how all files in network, [l]eave chord network");
@@ -84,9 +85,10 @@ public class CmdLineInterface {
                 //list files
                 case 'l':
                     System.out.println("--- Leave network ---");
-                    // leave network
+                    filestore.leaveChordRing();
                     System.out.println("Shutting down node.");
-                    return;
+                    shutDown = true;
+                    break;
                 default:
                     System.out.println("!! Invalid input !!");
                     break;
