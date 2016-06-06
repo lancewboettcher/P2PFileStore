@@ -1,13 +1,13 @@
 package chord;
 
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.util.Set;
-
 import de.uniba.wiai.lspi.chord.data.URL;
 import de.uniba.wiai.lspi.chord.service.Chord;
 import de.uniba.wiai.lspi.chord.service.Key;
 import de.uniba.wiai.lspi.chord.service.ServiceException;
+
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.util.Set;
 
 public class ChordWrapper {
 	
@@ -33,7 +33,6 @@ public class ChordWrapper {
 		} catch (ServiceException e) {
 			throw new RuntimeException("Could not join DHT!", e);
 		}
-		
 	}
 	
 	public void createChordNetwork(String host, Integer port) {
@@ -92,4 +91,12 @@ public class ChordWrapper {
 		}
 		
 	}
+
+	public void leave() {
+        try {
+            chord.leave();
+        } catch (ServiceException e) {
+            System.out.println("Error leaving network");
+        }
+    }
 }

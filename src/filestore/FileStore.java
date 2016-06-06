@@ -46,4 +46,11 @@ public class FileStore {
 	public void addFile(String filename, String filepath) {
 		chord.insert(new Key(filename), filepath);
 	}
+
+    /*
+     * Leave Chordring
+     */
+    public void leaveChordRing() {
+        chord.leave();
+    }
 }
