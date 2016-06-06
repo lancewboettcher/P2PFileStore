@@ -48,13 +48,19 @@ public class CmdLineInterface {
             char i = scanner.next().charAt(0);
             switch (i)
             {
+                //request file
                 case 'r':
                     System.out.println("--- Request file ---");
                     System.out.println("Input filename to request:");
-                    String reqFilename = scanner.next();
-                    Map<String, List<String>> fileLocations = filestore.requestFile(reqFilename);
-                    // TODO print
+                    String reqFilename = scanner.next();/*
+                    List<String> fileLocations = filestore.requestFile(reqFilename);
+                    System.out.println("Locations for " + reqFilename + ":");
+
+                    for(String s: fileLocations)
+                            System.out.println("    " + s);
+*/
                     break;
+                //add file
                 case 'a':
                     System.out.println("--- Add file ---");
                     System.out.println("Input filename to add:");
@@ -63,11 +69,16 @@ public class CmdLineInterface {
                     String filepath = scanner.next();
                     filestore.addFile(addFilename, filepath);
                     break;
+                //show all files in network
                 case 's':
                     System.out.println("--- Show all files ---");
                     Map<String, Integer> fileList = filestore.listFiles();
-                    // TODO print
+/*
+                    for (String s: fileList)
+                        System.out.println("File: " + s + " Number of nodes: " + fileList.get(s));
+*/
                     break;
+                //list files
                 case 'l':
                     System.out.println("--- Leave network ---");
                     // leave network
