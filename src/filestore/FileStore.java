@@ -5,8 +5,8 @@ import db.DBWrapper;
 import de.uniba.wiai.lspi.chord.console.command.entry.Key;
 import domain.P2PFile;
 
+import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class FileStore {
 	
@@ -47,8 +47,31 @@ public class FileStore {
 	 * Return: List<Hosts>
 	 */
 	public List<String> requestFile(String filename) {
-		return chord.retrieve(new Key(filename)).stream().map(Object::toString).collect(Collectors.toList());
-	}
+        // Do not change to stream, because lab machines are runing on Java7
+        List<String> files = new LinkedList<>();
+        for (Serializable ser : chord.retrieve(new Key(filename))) {
+            files.add(ser.toString());
+        }
+        if(files.size() == 0)
+        {
+            System.out.println("\tFile does not exist in DHT.");
+            files = db.getFile(filename).getHosts();
+        }
+        if(files.size() == 0)
+        {
+            System.out.println("\tFile does not exist in DB.");
+        }
+        for (String h : files) {
+            if(h.contains(chord.getHostAddress())){
+                // If host already saves file, do not add it again
+                return files;
+            }
+        }
+        // Add this host to saving nodes for this file
+        System.out.println("\tNode now also saves this file");
+        addFile(filename, "tmp");
+        return files;
+    }
 	
 	/*
 	 * Add File 
@@ -76,7 +99,7 @@ public class FileStore {
             System.out.printf("Node on %s is leaving. Saved following files:\n", chord.getHostAddress());
             String hostAdd = chord.getHostAddress();
             for (String filename : savedFiles.keySet()) {
-//            db.removeFile(filename, hostAdd);
+            db.removeFile(filename, hostAdd);
                 chord.remove(new Key(filename), savedFiles.get(filename));
                 System.out.println("   " + filename);
             }

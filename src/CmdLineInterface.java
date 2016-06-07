@@ -56,11 +56,14 @@ public class CmdLineInterface {
                     System.out.println("Input filename to request:");
                     String reqFilename = scanner.next();
                     List<String> fileLocations = filestore.requestFile(reqFilename);
-                    System.out.println("Locations for " + reqFilename + ":");
-
-                    for(String s: fileLocations)
+                    if(fileLocations.size() == 0)
+                    {
+                        System.out.println("File does not exist in DHT or DB");
+                    } else {
+                        System.out.println("Locations for " + reqFilename + ":");
+                        for(String s: fileLocations)
                             System.out.println("    " + s);
-
+                    }
                     break;
                 //add file
                 case 'a':
