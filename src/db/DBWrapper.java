@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import domain.P2PFile;
+import domain.RemoveFilePayload;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -65,15 +66,8 @@ public class DBWrapper {
 	public void removeFile(String filename, String host) {
 
 		ObjectMapper mapper = new ObjectMapper();
-		
-		class RemoveFilePayload {
-			String filename;
-			String host;
-		}
-		
-		RemoveFilePayload payloadObject = new RemoveFilePayload();
-		payloadObject.filename = filename;
-		payloadObject.host = host;
+
+		RemoveFilePayload payloadObject = new RemoveFilePayload(filename, host);
 
 		try {
 
