@@ -1,5 +1,10 @@
 package db;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import domain.P2PFile;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,15 +13,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import domain.P2PFile;
-
 public class DBWrapper {
 	
-	private static final String dbHost = "http://localhost:3005/";
+	private static final String dbHost = "http://52.32.187.22:3005/";
 
 	public P2PFile[] listFiles() {
 		String json = getRequest(dbHost + "listFiles");

@@ -1,20 +1,18 @@
 package filestore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import chord.ChordWrapper;
 import db.DBWrapper;
 import de.uniba.wiai.lspi.chord.console.command.entry.Key;
 import domain.P2PFile;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class FileStore {
 	
 	ChordWrapper chord = new ChordWrapper();
 	DBWrapper db = new DBWrapper();
+    Map<String, String> savedFiles;
 	
 	public FileStore(String thisHost, Integer thisPort, String bootstrapHost, Integer bootstrapPort) {
 		if (bootstrapPort == null) {
@@ -23,12 +21,12 @@ public class FileStore {
 		else {
 			chord.joinChordNetwork(thisHost, thisPort, bootstrapHost, bootstrapPort);
 		}
+        savedFiles = new HashMap<>();
 	}
 
 	/* 
 	 * List Files
 	 * Return: <Filename, # Nodes Containing File>
-	 *     TODO contact DB for all filenames (chord does not know what files are in it)
 	 */
 	public Map<String, Integer> listFiles() {
 		
@@ -57,19 +55,37 @@ public class FileStore {
 	 * Params: Filename, Filepath
 	 */
 	public void addFile(String filename, String filepath) {
-		ArrayList<String> hosts = new ArrayList<String>();
-		hosts.add("localhost");
-		P2PFile file = new P2PFile("test.txt", 2, 3, hosts);
-		
-		db.addFile(file);
-		
-		chord.insert(new Key(filename), filepath);
+        String totalFilepath = chord.getHostAddress() + "/" + filepath;
+		List<String> hosts = new ArrayList<>();
+
+        savedFiles.put(filename, totalFilepath);
+		hosts.add(totalFilepath);
+		P2PFile file = new P2PFile(filename, 2, 3, hosts);
+
+//        System.out.println(">>> Add to DB");
+        db.addFile(file);
+//        System.out.println(">>> Add to DHT");
+        chord.insert(new Key(filename), totalFilepath);
 	}
 
     /*
      * Leave Chordring
      */
     public void leaveChordRing() {
+        if(savedFiles.size() > 0){
+            System.out.printf("Node on %s is leaving. Saved following files:\n", chord.getHostAddress());
+            String hostAdd = chord.getHostAddress();
+            for (String filename : savedFiles.keySet()) {
+//            db.removeFile(filename, hostAdd);
+                chord.remove(new Key(filename), savedFiles.get(filename));
+                System.out.println("   " + filename);
+            }
+        }
+        else
+        {
+            System.out.printf("Node on %s is leaving. Saved no files.\n", chord.getHostAddress());
+        }
+
         chord.leave();
     }
 }

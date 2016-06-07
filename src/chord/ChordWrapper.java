@@ -12,6 +12,7 @@ import java.util.Set;
 public class ChordWrapper {
 	
 	public Chord chord;
+    private String hostAddress;
 	
 	public void joinChordNetwork(String thisHost, Integer thisPort, String bootstrapHost, Integer bootstrapPort) {
 		de.uniba.wiai.lspi.chord.service.PropertiesLoader.loadPropertyFile();
@@ -29,7 +30,7 @@ public class ChordWrapper {
 		(); try {
 			chord.join(localURL , bootstrapURL);
 			System.out.println("Joined Chord Network");
-			
+			hostAddress = thisHost;
 		} catch (ServiceException e) {
 			throw new RuntimeException("Could not join DHT!", e);
 		}
@@ -49,17 +50,18 @@ public class ChordWrapper {
 		try { 
 			chord.create(localURL);
 			System.out.println("Created Chord Network");
+            hostAddress = host;
 		} catch (ServiceException e) {
 			throw new RuntimeException("Could not create DHT!", e);
 		}
 	}
 	
 	public void insert(Key key, Serializable value) {
-		System.out.println("Inserting: " + value);
+		System.out.println("Inserting: {" + new String(key.getBytes()) + "," + value + "}");
 		
 		try{
 			chord.insert(key, value);
-			System.out.println("Inserted: " + value);			
+			System.out.println("Done");
 		} catch(ServiceException e){ //handle exception
 			System.out.println("Error inserting");
 		}
@@ -70,8 +72,6 @@ public class ChordWrapper {
 		
 		try{
 			res = chord.retrieve(key);
-		
-			System.out.println("Retrieved: " + res);
 		} catch(ServiceException e){ //handle exception
 			System.out.println("Error inserting");
 		}
@@ -98,5 +98,9 @@ public class ChordWrapper {
         } catch (ServiceException e) {
             System.out.println("Error leaving network");
         }
+    }
+
+    public String getHostAddress() {
+        return hostAddress;
     }
 }
