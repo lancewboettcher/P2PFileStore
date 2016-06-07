@@ -1,5 +1,6 @@
 import filestore.FileStore;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -80,9 +81,26 @@ public class CmdLineInterface {
                     Map<String, Integer> fileList = filestore.listFiles();
 
                     Set<String> keySet = fileList.keySet();
+                    
+                    final ArrayList<ArrayList<String>> table = new ArrayList<ArrayList<String>>();
+                    
+                    for (String s: keySet) {
+                    	ArrayList<String> row = new ArrayList<String>();
+                    	row.add(s);
+                    	row.add(fileList.get(s).toString());
+                    	
+                    	table.add(row);
+                    }
+                        //System.out.println("File: " + s + " Number of nodes: " + fileList.get(s));
 
-                    for (String s: keySet)
-                        System.out.println("File: " + s + " Number of nodes: " + fileList.get(s));
+                    System.out.format("%-15s%-15s\n", "Filename", "Number of Nodes");
+                    System.out.println("------------------------------");
+                    for (ArrayList<String> row : table) {
+                    	Object[] rowArr = row.toArray();
+                    	System.out.format("%-15s%-15s\n", rowArr);
+                    }
+
+
 
                     break;
                 //list files

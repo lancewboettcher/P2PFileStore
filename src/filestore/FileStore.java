@@ -13,6 +13,8 @@ public class FileStore {
 	ChordWrapper chord = new ChordWrapper();
 	DBWrapper db = new DBWrapper();
     Map<String, String> savedFiles;
+    
+    P2PFile[] snapshot = null;
 	
 	public FileStore(String thisHost, Integer thisPort, String bootstrapHost, Integer bootstrapPort) {
 		if (bootstrapPort == null) {
@@ -33,6 +35,7 @@ public class FileStore {
 		Map<String, Integer> listFileOutput = new HashMap<String, Integer>();
 		
 		P2PFile[] files = db.listFiles();
+		snapshot = files;
 		
 		for (P2PFile file : files) {
 			listFileOutput.put(file.getFilename(), file.getHosts().size());
@@ -48,29 +51,46 @@ public class FileStore {
 	 */
 	public List<String> requestFile(String filename) {
         // Do not change to stream, because lab machines are runing on Java7
-        List<String> files = new LinkedList<>();
+        List<String> hosts = new LinkedList<>();
         for (Serializable ser : chord.retrieve(new Key(filename))) {
-            files.add(ser.toString());
+        	System.out.println("Looking for file in DHT");
+        	
+            hosts.add(ser.toString());
+            
+            if (hosts.size() > 0) {
+            	System.out.println("Retrieved file from DHT.");
+            }
         }
-        if(files.size() == 0)
+        if (hosts.size() == 0) {
+        	System.out.println("\tFile does not exist in DHT.");
+        	
+        	for (P2PFile f : snapshot) {
+        		if (f.getFilename() == filename) {
+        			System.out.println("\tRetrieving file from snapshot");
+        			
+        			hosts = f.getHosts();
+        		}
+        	}
+        }
+        if(hosts.size() == 0)
         {
-            System.out.println("\tFile does not exist in DHT.");
-            files = db.getFile(filename).getHosts();
+            System.out.println("\tFile does not exist in Snapshot.");
+            hosts = db.getFile(filename).getHosts();
         }
-        if(files.size() == 0)
+        if(hosts.size() == 0)
         {
-            System.out.println("\tFile does not exist in DB.");
+            System.out.println("\tFile does not exist anywhere.");
         }
-        for (String h : files) {
+        for (String h : hosts) {
             if(h.contains(chord.getHostAddress())){
                 // If host already saves file, do not add it again
-                return files;
+                return hosts;
             }
         }
         // Add this host to saving nodes for this file
         System.out.println("\tNode now also saves this file");
         addFile(filename, "tmp");
-        return files;
+        return hosts;
     }
 	
 	/*
@@ -88,6 +108,9 @@ public class FileStore {
 //        System.out.println(">>> Add to DB");
         db.addFile(file);
 //        System.out.println(">>> Add to DHT");
+        
+		snapshot = db.listFiles();
+        
         chord.insert(new Key(filename), totalFilepath);
 	}
 
