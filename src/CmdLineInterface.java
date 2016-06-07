@@ -80,12 +80,14 @@ public class CmdLineInterface {
                     Map<String, Integer> fileList = filestore.listFiles();
 
                     Set<String> keySet = fileList.keySet();
-
-                    for (String s: keySet)
-                        System.out.println("File: " + s + " Number of nodes: " + fileList.get(s));
+                    if(keySet.isEmpty())
+                        System.out.println("No files in network.");
+                    else
+                        for (String s: keySet)
+                            System.out.println("File: " + s + " Number of nodes: " + fileList.get(s));
 
                     break;
-                //list files
+                //leave chord network
                 case 'l':
                     System.out.println("--- Leave network ---");
                     filestore.leaveChordRing();
