@@ -13,8 +13,7 @@ public class FileStore {
 	ChordWrapper chord = new ChordWrapper();
 	DBWrapper db = new DBWrapper();
     Map<String, String> savedFiles;
-    
-    P2PFile[] snapshot = null;
+    P2PFile[] snapshot;
 	
 	public FileStore(String thisHost, Integer thisPort, String bootstrapHost, Integer bootstrapPort) {
 		if (bootstrapPort == null) {
@@ -24,7 +23,22 @@ public class FileStore {
 			chord.joinChordNetwork(thisHost, thisPort, bootstrapHost, bootstrapPort);
 		}
         savedFiles = new HashMap<>();
+        snapshot = db.listFiles();
 	}
+
+    /*
+     * Find file in snapshot
+     * Params: Filename
+     * Return: List<Hosts>
+     */
+    List<String> findInSnaphot(String filename) {
+        for (P2PFile f : snapshot) {
+            if (f.getFilename() == filename) {
+                return f.getHosts();
+            }
+        }
+        return new LinkedList<>();
+    }
 
 	/* 
 	 * List Files
@@ -34,10 +48,9 @@ public class FileStore {
 		
 		Map<String, Integer> listFileOutput = new HashMap<String, Integer>();
 		
-		P2PFile[] files = db.listFiles();
-		snapshot = files;
+		snapshot = db.listFiles();;
 		
-		for (P2PFile file : files) {
+		for (P2PFile file : snapshot) {
 			listFileOutput.put(file.getFilename(), file.getHosts().size());
 		}
 		
@@ -56,30 +69,24 @@ public class FileStore {
         	System.out.println("Looking for file in DHT");
         	
             hosts.add(ser.toString());
-            
-            if (hosts.size() > 0) {
-            	System.out.println("Retrieved file from DHT.");
-            }
+
         }
         if (hosts.size() == 0) {
         	System.out.println("\tFile does not exist in DHT.");
         	
-        	for (P2PFile f : snapshot) {
-        		if (f.getFilename() == filename) {
-        			System.out.println("\tRetrieving file from snapshot");
-        			
-        			hosts = f.getHosts();
-        		}
-        	}
+        	hosts = findInSnaphot(filename);
         }
         if(hosts.size() == 0)
         {
             System.out.println("\tFile does not exist in Snapshot.");
-            hosts = db.getFile(filename).getHosts();
+
+            snapshot = db.listFiles();
+            hosts = findInSnaphot(filename);
         }
         if(hosts.size() == 0)
         {
             System.out.println("\tFile does not exist anywhere.");
+            return hosts;
         }
         for (String h : hosts) {
             if(h.contains(chord.getHostAddress())){
@@ -88,8 +95,8 @@ public class FileStore {
             }
         }
         // Add this host to saving nodes for this file
-        System.out.println("\tNode now also saves this file");
         addFile(filename, "tmp");
+        System.out.println("\tNode now also saves this file");
         return hosts;
     }
 	
