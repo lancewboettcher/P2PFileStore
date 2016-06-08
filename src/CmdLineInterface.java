@@ -77,9 +77,9 @@ public class CmdLineInterface {
                     Map<String, Integer> fileList = filestore.listFiles();
 
                     Set<String> keySet = fileList.keySet();
-                    
+
                     final ArrayList<ArrayList<String>> table = new ArrayList<ArrayList<String>>();
-                    
+
                     if(keySet.isEmpty())
                         System.out.println("No files in network.");
                     else {
@@ -87,12 +87,12 @@ public class CmdLineInterface {
 	                    	ArrayList<String> row = new ArrayList<String>();
 	                    	row.add(s);
 	                    	row.add(fileList.get(s).toString());
-	                    	
+
 	                    	table.add(row);
 	                    }
 	                        //System.out.println("File: " + s + " Number of nodes: " + fileList.get(s));
-	
-	                    System.out.format("%-15s%-15s\n", "Filename", "Number of Nodes");
+
+	                    System.out.format("%-15s%-15s%-15s\n", "Filename", "Number of Nodes");
 	                    System.out.println("------------------------------");
 	                    for (ArrayList<String> row : table) {
 	                    	Object[] rowArr = row.toArray();

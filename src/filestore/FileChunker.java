@@ -13,52 +13,56 @@ public class FileChunker {
     //Source: http://stackoverflow.com/questions/19177994/java-read-file-and-split-into-multiple-files
     public static void Chunk(String toChunk) throws Exception {
 
-            RandomAccessFile raf = new RandomAccessFile(toChunk, "r");
+        RandomAccessFile raf = new RandomAccessFile(toChunk, "r");
 
-            String dir = "./chunks";
-            
-            File dirPath = new File(dir);
-            if (!dirPath.exists()) {
-               File directory = new File(dir);
-               if(!directory.mkdir()) {
-                   System.out.println("Error creating chunk directory. Exiting.");
-                   return;
-               }
-            }
-            long sourceSize = raf.length();
-            long bytesPerSplit = 8 * 1024;
-            long numSplits = sourceSize/bytesPerSplit;
-            long remainingBytes = sourceSize % numSplits;
-            StringTokenizer strTok = new StringTokenizer(toChunk, ".");
-            String path = strTok.nextToken();
-        //    System.out.println("path: " +  path);
-            String extension = strTok.nextToken();
-            StringTokenizer strTok2 = new StringTokenizer(path, "/");
-            String fileName = path.substring(path.lastIndexOf("/")+1);
-        //    System.out.println("filename: " +  fileName);
+        String dir = "./chunks";
 
-            int destIx;
-            for(destIx=1; destIx <= numSplits; destIx++) {
-                BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(dir + "/" + fileName +destIx + '.' + extension));
-                readWrite(raf, bw, bytesPerSplit);
-                bw.close();
-            }
+        File dirPath = new File(dir);
+        if (!dirPath.exists()) {
+         File directory = new File(dir);
+         if(!directory.mkdir()) {
+             System.out.println("Error creating chunk directory. Exiting.");
+             return;
+         }
+     }
 
-            if(remainingBytes > 0) {
-                BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(dir + "/" + fileName + destIx + '.' + extension));
-                readWrite(raf, bw, remainingBytes);
-                bw.close();
-            }
+     long sourceSize = raf.length();
+     long bytesPerSplit = 8 * 1024;
 
-            raf.close();
-    
-        //long numSplits = 10; //from user input, extract it from args
+     long numSplits = sourceSize/bytesPerSplit;
+     long remainingBytes = sourceSize % numSplits;
+     StringTokenizer strTok = new StringTokenizer(toChunk, ".");
+     String path = strTok.nextToken();
 
+     String extension = strTok.nextToken();
+     StringTokenizer strTok2 = new StringTokenizer(path, "/");
+     String fileName = path.substring(path.lastIndexOf("/")+1);
+
+     if(sourceSize > bytesPerSplit) {
+        int destIx;
+        for(destIx=1; destIx <= numSplits; destIx++) {
+            BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(dir + "/" + fileName +destIx + '.' + extension));
+            readWrite(raf, bw, bytesPerSplit);
+            bw.close();
+        }
+
+        if(remainingBytes > 0) {
+            BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(dir + "/" + fileName + destIx + '.' + extension));
+            readWrite(raf, bw, remainingBytes);
+            bw.close();
+        }
+
+        raf.close();
+    } else {
+        BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(dir + "/" + fileName + '.' + extension));
+        readWrite(raf, bw, sourceSize);
+        bw.close();
     }
+}
 
-    private static void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
-        byte[] buf = new byte[(int) numBytes];
-        int val = raf.read(buf);
-        if(val != -1) bw.write(buf);
-    }
+private static void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
+    byte[] buf = new byte[(int) numBytes];
+    int val = raf.read(buf);
+    if(val != -1) bw.write(buf);
+}
 }
