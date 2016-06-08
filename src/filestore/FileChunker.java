@@ -1,6 +1,8 @@
 package filestore;
 import java.util.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Created by Mikhail Gundogdu on 6/7/16.
@@ -10,32 +12,34 @@ import java.io.*;
 public class FileChunker {
     //Source: http://stackoverflow.com/questions/19177994/java-read-file-and-split-into-multiple-files
     public static void Chunk(String toChunk) throws Exception {
-        try {
+
             RandomAccessFile raf = new RandomAccessFile(toChunk, "r");
 
             String dir = "./chunks";
-            File directory = new File(dir);
-            if(!directory.mkdir()) {
-                System.out.println("Error creating chunk directory. Exiting.");
-                return;
+            
+            File dirPath = new File(dir);
+            if (!dirPath.exists()) {
+               File directory = new File(dir);
+               if(!directory.mkdir()) {
+                   System.out.println("Error creating chunk directory. Exiting.");
+                   return;
+               }
             }
-
             long sourceSize = raf.length();
             long bytesPerSplit = 8 * 1024;
             long numSplits = sourceSize/bytesPerSplit;
             long remainingBytes = sourceSize % numSplits;
             StringTokenizer strTok = new StringTokenizer(toChunk, ".");
             String path = strTok.nextToken();
-            System.out.println("path: " +  path);
+        //    System.out.println("path: " +  path);
             String extension = strTok.nextToken();
             StringTokenizer strTok2 = new StringTokenizer(path, "/");
             String fileName = path.substring(path.lastIndexOf("/")+1);
-            System.out.println("filename: " +  fileName);
+        //    System.out.println("filename: " +  fileName);
 
             int destIx;
             for(destIx=1; destIx <= numSplits; destIx++) {
                 BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(dir + "/" + fileName +destIx + '.' + extension));
-                System.out.println("here " +  destIx);
                 readWrite(raf, bw, bytesPerSplit);
                 bw.close();
             }
@@ -47,9 +51,7 @@ public class FileChunker {
             }
 
             raf.close();
-        } catch(FileNotFoundException e){
-            System.out.println("File access error. Exiting.");
-        }
+    
         //long numSplits = 10; //from user input, extract it from args
 
     }
