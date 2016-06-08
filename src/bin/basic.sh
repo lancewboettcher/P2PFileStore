@@ -2,16 +2,12 @@
 
 #GLHF
 
-HOST_IP = $SSH_CONNECTION | awk '{print $1}'
-HOST_PORT = $SSH_CONNECTION | awk '{print $2}'
-
-
 HOST_IP=`echo $SSH_CONNECTION | awk {'print $1'}`
 HOST_PORT=`echo $SSH_CONNECTION | awk {'print $2'}`
 
 
-SSH_IP = `echo $SSH_CONNECTION | awk {'print $3'}`
-SSH_PORT = `echo $SSH_CONNECTION | awk {'print $1'}`
+SSH_IP=`echo $SSH_CONNECTION | awk {'print $3'}`
+SSH_PORT=`echo $SSH_CONNECTION | awk {'print $1'}`
 
 
 # Node 1
