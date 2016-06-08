@@ -109,7 +109,7 @@ public class FileStore {
             }
         }
         // Add this host to saving nodes for this file
-        addFile(filename);
+        addFile(filename, true);
         System.out.println("\tNode now also saves this file");
         return hosts;
     }
@@ -118,15 +118,18 @@ public class FileStore {
 	 * Add File 
 	 * Params: Filename, Filepath
 	 */
-	public void addFile(String filename) {
+	public void addFile(String filename, boolean calledFromRequest) {
         if (pingDB()) return;
         
-        try {
-         FileChunker.Chunk(filename);
-      } catch (Exception e1) {
-         System.out.println("Error. File not found");
-         return;
-      }
+        if (!calledFromRequest) {
+           try {
+              FileChunker.Chunk(filename);
+           } catch (Exception e1) {
+              System.out.println("Error. File not found");
+              return;
+           }
+        }
+        
 
         String totalFilepath = chord.getHostAddress() + "/chunks/" + filename;
 		List<String> hosts = new ArrayList<>();
