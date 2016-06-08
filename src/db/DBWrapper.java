@@ -15,10 +15,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class DBWrapper {
-	//
+
 	private static final String dbHost = "http://52.32.187.22:3005/";
 
-	public P2PFile[] listFiles() {
+	public P2PFile[] listFiles() throws Exception {
 		String json = getRequest(dbHost + "listFiles");
 
 		//System.out.println(json);
@@ -43,113 +43,91 @@ public class DBWrapper {
 	}
 	
 	public void addFile(P2PFile file) {
-
 		ObjectMapper mapper = new ObjectMapper();
-
 		try {
 
 			String payload = mapper.writeValueAsString(file);
-			
-			System.out.println("Payload: \n" + payload);
-			
+//			System.out.println("Payload: \n" + payload);
 			postRequest(dbHost + "addFile", payload);
 
-		} catch (JsonGenerationException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) {
+            System.out.println("Error while adding file to DB.");
+        }
 	}
 	
 	public void removeFile(String filename, String host) {
 
 		ObjectMapper mapper = new ObjectMapper();
-
 		RemoveFilePayload payloadObject = new RemoveFilePayload(filename, host);
 
 		try {
-
 			String payload = mapper.writeValueAsString(payloadObject);
-			
-			System.out.println("Payload: \n" + payload);
-			
+//			System.out.println("Payload: \n" + payload);
 			postRequest(dbHost + "removeFile", payload);
-
-		} catch (JsonGenerationException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) {
+            System.out.println("DB is down.");
+        }
 	}
 	
-	public P2PFile getFile(String filename) {
-		String json = getRequest(dbHost + "getFile/" + filename);
+	public P2PFile getFile(String filename) throws Exception {
+        P2PFile file = null;
 
-		//System.out.println(json);
+		String json = getRequest(dbHost + "getFile/" + filename);
+        if(json == null) { // File not found, but DB is up
+            return file;
+        }
 
 		ObjectMapper mapper = new ObjectMapper();
-		P2PFile file = null;
-
 		try {
-
 			// Convert JSON string from file to Object
 			file = mapper.readValue(json, P2PFile.class);
-
-		} catch (JsonGenerationException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) {
+            System.out.println("Error reading json value");
+        }
 		
 		return file;
 	}
 	
-	public void removeAllFiles() {
-		getRequest(dbHost + "removeAll");
-	}
+	//	public void removeAllFiles() {
+//		getRequest(dbHost + "removeAll");
+//	}
 
-	private static String getRequest(String path) {
+	private static String getRequest(String path) throws Exception {
 		String output = "";
 
-		try {
-			URL url = new URL(path);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("GET");
-			conn.setRequestProperty("Accept", "application/json");
+//		try {
+		URL url = new URL(path);
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		conn.setRequestProperty("Accept", "application/json");
 
-			if (conn.getResponseCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : "
-						+ conn.getResponseCode());
-			}
-
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					(conn.getInputStream())));
-
-			output = br.readLine();
-			// System.out.println("Output from Server .... \n");
-			// System.out.println(output);
-			/*
-			 * while ((output = br.readLine()) != null) {
-			 * System.out.println(output); }
-			 */
-
-			conn.disconnect();
-
-		} catch (MalformedURLException e) {
-
-			e.printStackTrace();
-
-		} catch (IOException e) {
-
-			e.printStackTrace();
-
+		if (conn.getResponseCode() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
 		}
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				(conn.getInputStream())));
+
+		output = br.readLine();
+		// System.out.println("Output from Server .... \n");
+		// System.out.println(output);
+		/*
+		 * while ((output = br.readLine()) != null) {
+		 * System.out.println(output); }
+		 */
+
+		conn.disconnect();
+
+//		}
+//		catch (MalformedURLException e) {
+//
+//			e.printStackTrace();
+//
+//		} catch (IOException e) {
+//
+//			e.printStackTrace();
+//
+//		}
 		return output;
 	}
 
@@ -168,33 +146,16 @@ public class DBWrapper {
 			os.flush();
 
 			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				throw new RuntimeException("Failed : HTTP error code : "
-						+ conn.getResponseCode());
+				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
 			}
 
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					(conn.getInputStream())));
-
-			// System.out.println("Output from Server .... \n");
-			// while ((output = br.readLine()) != null) {
-			// System.out.println(output);
-			// }
-
+			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 			output = br.readLine();
-
 			conn.disconnect();
 
-		} catch (MalformedURLException e) {
-
-			e.printStackTrace();
-
-		} catch (IOException e) {
-
-			e.printStackTrace();
-
+		} catch (Exception e) {
+            System.out.println("Error sending post request: " + e.getMessage());
 		}
 		return output;
-
 	}
-
 }

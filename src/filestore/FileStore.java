@@ -13,7 +13,7 @@ public class FileStore {
 	ChordWrapper chord = new ChordWrapper();
 	DBWrapper db = new DBWrapper();
     Map<String, String> savedFiles;
-    P2PFile[] snapshot;
+    P2PFile[] snapshot = null;
 	
 	public FileStore(String thisHost, Integer thisPort, String bootstrapHost, Integer bootstrapPort) {
 		if (bootstrapPort == null) {
@@ -23,8 +23,12 @@ public class FileStore {
 			chord.joinChordNetwork(thisHost, thisPort, bootstrapHost, bootstrapPort);
 		}
         savedFiles = new HashMap<>();
-        snapshot = db.listFiles();
-	}
+        try {
+            snapshot = db.listFiles();
+        } catch (Exception e) {
+            System.out.println("Could not retrieve initial snapshot");
+        }
+    }
 
     /*
      * Find file in snapshot
@@ -47,13 +51,19 @@ public class FileStore {
 	public Map<String, Integer> listFiles() {
 		
 		Map<String, Integer> listFileOutput = new HashMap<String, Integer>();
-		
-		snapshot = db.listFiles();;
-		
-		for (P2PFile file : snapshot) {
-			listFileOutput.put(file.getFilename(), file.getHosts().size());
-		}
-		
+
+        try {
+            snapshot = db.listFiles();
+        } catch (Exception e) {
+            System.out.println("DB is down. Returning latest snapshot.");
+        }
+
+        if(snapshot != null) {
+            for (P2PFile file : snapshot) {
+                listFileOutput.put(file.getFilename(), file.getHosts().size());
+            }
+        }
+
 		return listFileOutput;
 	}
 	
@@ -63,13 +73,13 @@ public class FileStore {
 	 * Return: List<Hosts>
 	 */
 	public List<String> requestFile(String filename) {
-        // Do not change to stream, because lab machines are runing on Java7
         List<String> hosts = new LinkedList<>();
-        for (Serializable ser : chord.retrieve(new Key(filename))) {
-        	System.out.println("Looking for file in DHT");
-        	
-            hosts.add(ser.toString());
+        if (pingDB()) return hosts;
 
+        System.out.println("Looking for file in DHT");
+        // Do not change to stream, because lab machines are running on Java7
+        for (Serializable ser : chord.retrieve(new Key(filename))) {
+            hosts.add(ser.toString());
         }
         if (hosts.size() == 0) {
         	System.out.println("\tFile does not exist in DHT.");
@@ -80,7 +90,11 @@ public class FileStore {
         {
             System.out.println("\tFile does not exist in Snapshot.");
 
-            snapshot = db.listFiles();
+            try {
+                snapshot = db.listFiles();
+            } catch (Exception e) {
+                System.out.println("Cannot reach DB");
+            }
             hosts = findInSnaphot(filename);
         }
         if(hosts.size() == 0)
@@ -105,6 +119,8 @@ public class FileStore {
 	 * Params: Filename, Filepath
 	 */
 	public void addFile(String filename, String filepath) {
+        if (pingDB()) return;
+
         String totalFilepath = chord.getHostAddress() + "/" + filepath;
 		List<String> hosts = new ArrayList<>();
 
@@ -112,14 +128,28 @@ public class FileStore {
 		hosts.add(totalFilepath);
 		P2PFile file = new P2PFile(filename, 2, 3, hosts);
 
-//        System.out.println(">>> Add to DB");
         db.addFile(file);
-//        System.out.println(">>> Add to DHT");
-        
-		snapshot = db.listFiles();
-        
+        try {
+            snapshot = db.listFiles();
+        } catch (Exception e) {
+            System.out.println("Cannot retrieve snapshot");
+        }
         chord.insert(new Key(filename), totalFilepath);
 	}
+
+    /*
+     * Sends command to DB, to check if it is available.
+     * Return: True if DB is down, false if up.
+     */
+    private boolean pingDB() {
+        try {
+            db.getFile("ping");
+        } catch(Exception e) {
+            System.out.println("DB is down.");
+            return true;
+        }
+        return false;
+    }
 
     /*
      * Leave Chordring
