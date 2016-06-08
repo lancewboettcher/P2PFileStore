@@ -93,10 +93,10 @@ public class CmdLineInterface {
 	                        //System.out.println("File: " + s + " Number of nodes: " + fileList.get(s));
 
 	                    System.out.format("%-30s%-15s\n", "Filename", "Number of Nodes");
-	                    System.out.println("------------------------------");
+	                    System.out.println("------------------------------------------------");
 	                    for (ArrayList<String> row : table) {
 	                    	Object[] rowArr = row.toArray();
-	                    	System.out.format("%-15s%-15s\n", rowArr);
+	                    	System.out.format("%-30s%-15s\n", rowArr);
 	                    }
                     }
                     //
