@@ -1,8 +1,6 @@
 package filestore;
 import java.util.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * Created by Mikhail Gundogdu on 6/7/16.
@@ -28,9 +26,10 @@ public class FileChunker {
 
      long sourceSize = raf.length();
      long bytesPerSplit = 8 * 1024;
+        long numSplits = sourceSize/bytesPerSplit;
+        long remainingBytes = sourceSize;
+        if(numSplits > 0) { remainingBytes = sourceSize % numSplits; }
 
-     long numSplits = sourceSize/bytesPerSplit;
-     long remainingBytes = sourceSize % numSplits;
      StringTokenizer strTok = new StringTokenizer(toChunk, ".");
      String path = strTok.nextToken();
 
@@ -52,12 +51,13 @@ public class FileChunker {
             bw.close();
         }
 
-        raf.close();
+
     } else {
         BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(dir + "/" + fileName + '.' + extension));
         readWrite(raf, bw, sourceSize);
         bw.close();
     }
+        raf.close();
 }
 
 private static void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
