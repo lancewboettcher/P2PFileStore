@@ -69,7 +69,7 @@ public class CmdLineInterface {
                     System.out.println("--- Add file ---");
                     System.out.println("Input filename to add:");
                     String addFilename = scanner.next();
-                    filestore.addFile(addFilename);
+                    filestore.addFile(addFilename, false);
                     break;
                 //show all files in network
                 case 's':
