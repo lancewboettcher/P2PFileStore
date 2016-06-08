@@ -57,11 +57,8 @@ public class ChordWrapper {
 	}
 	
 	public void insert(Key key, Serializable value) {
-		System.out.println("Inserting: {" + new String(key.getBytes()) + "," + value + "}");
-		
 		try{
 			chord.insert(key, value);
-			System.out.println("Done");
 		} catch(ServiceException e){ //handle exception
 			System.out.println("Error inserting");
 		}
@@ -80,16 +77,11 @@ public class ChordWrapper {
 	}
 	
 	public void remove(Key key, Serializable value) {
-		Set<Serializable> res = null;
-		
 		try{
 			chord.remove(key, value);
-		
-			System.out.println("Retrieved: " + res);
 		} catch(ServiceException e){ //handle exception
 			System.out.println("Error inserting");
 		}
-		
 	}
 
 	public void leave() {
